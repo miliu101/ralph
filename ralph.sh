@@ -34,7 +34,7 @@ if [[ "$TOOL" != "amp" && "$TOOL" != "claude" ]]; then
   exit 1
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$SCRIPT_DIR")
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 RALPH_DIR="$PROJECT_ROOT/ralph"
 mkdir -p "$RALPH_DIR"
 
@@ -92,12 +92,25 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   echo "==============================================================="
 
   # Run the selected tool with the ralph prompt
+  # Background timer so the user knows the process is alive
+  START_TIME=$SECONDS
+  ( while true; do
+      sleep 30
+      ELAPSED=$(( SECONDS - START_TIME ))
+      echo "  ... still working (${ELAPSED}s elapsed)" >&2
+    done ) &
+  TIMER_PID=$!
+
   if [[ "$TOOL" == "amp" ]]; then
     OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
   else
     # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
     OUTPUT=$(claude --dangerously-skip-permissions --print < "$SCRIPT_DIR/CLAUDE.md" 2>&1 | tee /dev/stderr) || true
   fi
+
+  # Stop the background timer
+  kill $TIMER_PID 2>/dev/null
+  wait $TIMER_PID 2>/dev/null
   
   # Check for completion signal
   if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
