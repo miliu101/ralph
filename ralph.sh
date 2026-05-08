@@ -34,10 +34,14 @@ if [[ "$TOOL" != "amp" && "$TOOL" != "claude" ]]; then
   exit 1
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PRD_FILE="$SCRIPT_DIR/prd.json"
-PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
-ARCHIVE_DIR="$SCRIPT_DIR/archive"
-LAST_BRANCH_FILE="$SCRIPT_DIR/.last-branch"
+PROJECT_ROOT=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$SCRIPT_DIR")
+RALPH_DIR="$PROJECT_ROOT/ralph"
+mkdir -p "$RALPH_DIR"
+
+PRD_FILE="$RALPH_DIR/prd.json"
+PROGRESS_FILE="$RALPH_DIR/progress.txt"
+ARCHIVE_DIR="$RALPH_DIR/archive"
+LAST_BRANCH_FILE="$RALPH_DIR/.last-branch"
 
 # Archive previous run if branch changed
 if [ -f "$PRD_FILE" ] && [ -f "$LAST_BRANCH_FILE" ]; then
@@ -109,5 +113,5 @@ done
 
 echo ""
 echo "Ralph reached max iterations ($MAX_ITERATIONS) without completing all tasks."
-echo "Check $PROGRESS_FILE for status."
+echo "Check $RALPH_DIR/progress.txt for status."
 exit 1

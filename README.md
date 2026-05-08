@@ -2,7 +2,7 @@
 
 ![Ralph](ralph.webp)
 
-Ralph is an autonomous AI agent loop that runs AI coding tools ([Amp](https://ampcode.com) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code)) repeatedly until all PRD items are complete. Each iteration is a fresh instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
+Ralph is an autonomous AI agent loop that runs AI coding tools ([Amp](https://ampcode.com) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code)) repeatedly until all PRD items are complete. Each iteration is a fresh instance with clean context. Memory persists via git history, `ralph/progress.txt`, and `ralph/prd.json`.
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -105,7 +105,7 @@ Use the Ralph skill to convert the markdown PRD to JSON:
 Load the ralph skill and convert tasks/prd-[feature-name].md to prd.json
 ```
 
-This creates `prd.json` with user stories structured for autonomous execution.
+This creates `ralph/prd.json` with user stories structured for autonomous execution.
 
 ### 3. Run Ralph
 
@@ -125,8 +125,8 @@ Ralph will:
 3. Implement that single story
 4. Run quality checks (typecheck, tests)
 5. Commit if checks pass
-6. Update `prd.json` to mark story as `passes: true`
-7. Append learnings to `progress.txt`
+6. Update `ralph/prd.json` to mark story as `passes: true`
+7. Append learnings to `ralph/progress.txt`
 8. Repeat until all stories pass or max iterations reached
 
 ## Key Files
@@ -136,9 +136,10 @@ Ralph will:
 | `ralph.sh` | The bash loop that spawns fresh AI instances (supports `--tool amp` or `--tool claude`) |
 | `prompt.md` | Prompt template for Amp |
 | `CLAUDE.md` | Prompt template for Claude Code |
-| `prd.json` | User stories with `passes` status (the task list) |
+| `ralph/prd.json` | User stories with `passes` status (the task list) |
+| `ralph/progress.txt` | Append-only learnings for future iterations |
+| `ralph/archive/` | Previous run archives (auto-created on branch change) |
 | `prd.json.example` | Example PRD format for reference |
-| `progress.txt` | Append-only learnings for future iterations |
 | `skills/prd/` | Skill for generating PRDs (works with Amp and Claude Code) |
 | `skills/ralph/` | Skill for converting PRDs to JSON (works with Amp and Claude Code) |
 | `.claude-plugin/` | Plugin manifest for Claude Code marketplace discovery |
@@ -164,8 +165,8 @@ npm run dev
 
 Each iteration spawns a **new AI instance** (Amp or Claude Code) with clean context. The only memory between iterations is:
 - Git history (commits from previous iterations)
-- `progress.txt` (learnings and context)
-- `prd.json` (which stories are done)
+- `ralph/progress.txt` (learnings and context)
+- `ralph/prd.json` (which stories are done)
 
 ### Small Tasks
 
@@ -212,10 +213,10 @@ Check current state:
 
 ```bash
 # See which stories are done
-cat prd.json | jq '.userStories[] | {id, title, passes}'
+cat ralph/prd.json | jq '.userStories[] | {id, title, passes}'
 
 # See learnings from previous iterations
-cat progress.txt
+cat ralph/progress.txt
 
 # Check git history
 git log --oneline -10
