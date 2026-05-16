@@ -95,14 +95,14 @@ Use the PRD skill to generate a detailed requirements document:
 Load the prd skill and create a PRD for [your feature description]
 ```
 
-Answer the clarifying questions. The skill saves output to `tasks/prd-[feature-name].md`.
+Answer the clarifying questions. The skill saves output to `ralph/prd-[feature-name].md`.
 
 ### 2. Convert PRD to Ralph format
 
 Use the Ralph skill to convert the markdown PRD to JSON:
 
 ```
-Load the ralph skill and convert tasks/prd-[feature-name].md to prd.json
+Load the ralph skill and convert ralph/prd-[feature-name].md to ralph/prd.json
 ```
 
 This creates `ralph/prd.json` with user stories structured for autonomous execution.
