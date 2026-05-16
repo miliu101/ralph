@@ -114,10 +114,18 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   
   # Check for completion signal
   if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
-    echo ""
-    echo "Ralph completed all tasks!"
-    echo "Completed at iteration $i of $MAX_ITERATIONS"
-    exit 0
+    # Verify all stories are actually complete before trusting the signal
+    REMAINING=$(jq '[.userStories[] | select(.passes == false)] | length' "$PRD_FILE" 2>/dev/null || echo "unknown")
+    if [ "$REMAINING" = "0" ]; then
+      echo ""
+      echo "Ralph completed all tasks!"
+      echo "Completed at iteration $i of $MAX_ITERATIONS"
+      exit 0
+    else
+      echo ""
+      echo "WARNING: Agent claimed COMPLETE but $REMAINING stories still have passes: false."
+      echo "Ignoring false completion signal. Continuing..."
+    fi
   fi
   
   echo "Iteration $i complete. Continuing..."
